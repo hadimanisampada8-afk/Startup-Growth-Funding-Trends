@@ -1,1 +1,21 @@
-
+Startup Name,Industry,Region,Funding Amount (M USD),Funding Rounds,Valuation (M USD),Revenue (M USD),Employees,Market Share (%),Profitable,Year Founded,Exit Status
+FinPay,FinTech,North America,250,6,3200,850,1200,18.5,True,2017,Private
+MediAI,HealthTech,Europe,180,4,2100,520,850,12.3,True,2018,Private
+ShopX,E-Commerce,Asia,300,8,4500,1200,2500,22.7,True,2016,IPO
+CloudNova,SaaS,North America,150,5,1800,430,700,10.5,False,2019,Private
+GreenGrid,CleanTech,Europe,120,3,1400,310,500,8.1,True,2020,Private
+EduSmart,EdTech,Asia,90,2,950,180,350,6.4,False,2021,Private
+AutoDrive,AI,North America,500,10,7000,1500,3200,25.4,True,2015,Private
+FoodFly,FoodTech,Asia,220,6,2800,760,1400,15.2,True,2018,Acquired
+BioNext,Biotech,Europe,170,5,2300,490,780,11.6,False,2017,Private
+SecureNet,Cybersecurity,North America,210,7,3500,910,1100,19.8,True,2016,IPO
+PayLink,FinTech,Asia,190,5,2600,620,900,13.4,True,2019,Private
+MediCareX,HealthTech,North America,280,7,3900,980,1600,20.1,True,2016,IPO
+RetailGo,E-Commerce,Europe,230,6,3100,870,1300,17.6,True,2018,Private
+CloudSync,SaaS,Asia,140,4,1700,390,650,9.8,False,2020,Private
+EcoVolt,CleanTech,North America,160,4,2200,540,750,12.8,True,2019,Private
+LearnPro,EdTech,Europe,110,3,1200,260,420,7.3,False,2021,Private
+DriveAI,AI,Asia,450,9,6200,1350,2900,23.5,True,2015,Private
+QuickBite,FoodTech,Europe,200,5,2500,680,1200,14.1,True,2018,Acquired
+GeneWorks,Biotech,North America,240,6,3400,820,980,18.2,True,2017,Private
+CyberGuard,Cybersecurity,Asia,260,7,4100,1020,1450,21.5,True,2016,IPO
