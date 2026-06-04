@@ -1,132 +1,122 @@
+import os
+import sys
 import streamlit as st
-import pandas as pd
 
+# Fix imports on Streamlit Cloud
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, ROOT_DIR)
 
-@st.cache_data
-def load_data():
-    """Load startup dataset."""
+from utils.data_loader import load_data, get_kpis
+from utils.styling import (
+    apply_theme,
+    page_banner,
+    section_header,
+    dashboard_footer
+)
 
-    try:
-        df = pd.read_csv("startup_data.csv")
-    except Exception as e:
-        st.error(f"Error loading startup_data.csv: {e}")
-        st.stop()
+# --------------------------------------------------
+# PAGE CONFIG
+# --------------------------------------------------
 
-    df.columns = df.columns.str.strip()
-    df = df.drop_duplicates()
+st.set_page_config(
+    page_title="🚀 Startup Analytics Dashboard",
+    page_icon="🚀",
+    layout="wide"
+)
 
-    numeric_cols = [
-        "Funding Rounds",
-        "Funding Amount (M USD)",
-        "Valuation (M USD)",
-        "Revenue (M USD)",
-        "Employees",
-        "Market Share (%)",
-        "Year Founded"
-    ]
+# --------------------------------------------------
+# LOAD CSS
+# --------------------------------------------------
 
-    for col in numeric_cols:
-        if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors="coerce")
-            df[col] = df[col].fillna(df[col].median())
+apply_theme()
 
-    categorical_cols = [
-        "Startup Name",
-        "Industry",
-        "Region",
-        "Exit Status"
-    ]
+# --------------------------------------------------
+# LOAD DATA
+# --------------------------------------------------
 
-    for col in categorical_cols:
-        if col in df.columns:
-            df[col] = df[col].fillna("Unknown")
-
-    return df
-
-
-@st.cache_data
-def get_filtered_data(industries=None, regions=None, exits=None):
-
+try:
     df = load_data()
+    kpis = get_kpis(df)
 
-    if industries:
-        df = df[df["Industry"].isin(industries)]
+except Exception as e:
+    st.error(f"Data Loading Error: {e}")
+    st.stop()
 
-    if regions:
-        df = df[df["Region"].isin(regions)]
+# --------------------------------------------------
+# HEADER
+# --------------------------------------------------
 
-    if exits:
-        df = df[df["Exit Status"].isin(exits)]
+page_banner(
+    "🚀 Startup Analytics Dashboard",
+    "Executive Intelligence Platform"
+)
 
-    return df
+# --------------------------------------------------
+# KPI SECTION
+# --------------------------------------------------
 
+section_header("Executive Snapshot")
 
-def get_kpis(df):
+c1, c2, c3 = st.columns(3)
 
-    profitability = 0
-
-    if "Profitable" in df.columns:
-        profitability = round(df["Profitable"].mean() * 100, 2)
-
-    return {
-        "total_startups": len(df),
-        "total_funding": round(df["Funding Amount (M USD)"].sum(), 2),
-        "avg_valuation": round(df["Valuation (M USD)"].mean(), 2),
-        "total_revenue": round(df["Revenue (M USD)"].sum(), 2),
-        "total_employees": int(df["Employees"].sum()),
-        "profitability_rate": profitability
-    }
-
-
-def get_top_startups(df, top_n=10):
-
-    return (
-        df.sort_values(
-            "Valuation (M USD)",
-            ascending=False
-        )
-        .head(top_n)
+with c1:
+    st.metric(
+        "Total Startups",
+        kpis["total_startups"]
     )
 
-
-def get_industry_summary(df):
-
-    return (
-        df.groupby("Industry")
-        .agg(
-            Funding=("Funding Amount (M USD)", "sum"),
-            Revenue=("Revenue (M USD)", "sum"),
-            Valuation=("Valuation (M USD)", "sum"),
-            Employees=("Employees", "sum")
-        )
-        .reset_index()
+    st.metric(
+        "Total Funding",
+        f"${kpis['total_funding']:,.0f}M"
     )
 
-
-def get_region_summary(df):
-
-    return (
-        df.groupby("Region")
-        .agg(
-            Funding=("Funding Amount (M USD)", "sum"),
-            Revenue=("Revenue (M USD)", "sum"),
-            Valuation=("Valuation (M USD)", "sum")
-        )
-        .reset_index()
+with c2:
+    st.metric(
+        "Average Valuation",
+        f"${kpis['avg_valuation']:,.0f}M"
     )
 
-
-def get_correlation_matrix(df):
-
-    numeric_df = df.select_dtypes(
-        include=["number"]
+    st.metric(
+        "Total Revenue",
+        f"${kpis['total_revenue']:,.0f}M"
     )
 
-    return numeric_df.corr()
+with c3:
+    st.metric(
+        "Employees",
+        f"{kpis['total_employees']:,}"
+    )
 
+    st.metric(
+        "Profitability",
+        f"{kpis['profitability_rate']}%"
+    )
 
-def get_unicorns(df):
+# --------------------------------------------------
+# DATA PREVIEW
+# --------------------------------------------------
 
-    return df[
-        df["Valuation (M USD)"] >= 1000
-    ]
+section_header("Dataset Preview")
+
+st.dataframe(
+    df.head(20),
+    use_container_width=True
+)
+
+# --------------------------------------------------
+# SIDEBAR
+# --------------------------------------------------
+
+st.sidebar.success(
+    "Startup Analytics Platform"
+)
+
+st.sidebar.info(
+    "Use the Pages menu to navigate through analytics."
+)
+
+# --------------------------------------------------
+# FOOTER
+# --------------------------------------------------
+
+dashboard_footer()
