@@ -1,1 +1,10 @@
-
+streamlit
+pandas
+numpy
+plotly
+openpyxl
+scikit-learn
+scipy
+pyarrow
+streamlit-option-menu
+Pillow
