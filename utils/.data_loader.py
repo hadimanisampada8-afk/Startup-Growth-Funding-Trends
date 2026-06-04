@@ -4,19 +4,16 @@ import pandas as pd
 
 @st.cache_data
 def load_data():
-    """
-    Load startup dataset and perform basic cleaning.
-    """
+    """Load startup dataset."""
 
-    df = pd.read_csv("startup_data.csv")
+    try:
+        df = pd.read_csv("startup_data.csv")
+    except Exception as e:
+        st.error(f"Error loading startup_data.csv: {e}")
+        st.stop()
 
-    # Remove duplicate rows
-    df = df.drop_duplicates()
-
-    # Remove leading/trailing spaces from column names
     df.columns = df.columns.str.strip()
-
-    # Fill missing values
+    df = df.drop_duplicates()
 
     numeric_cols = [
         "Funding Rounds",
@@ -30,6 +27,7 @@ def load_data():
 
     for col in numeric_cols:
         if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
             df[col] = df[col].fillna(df[col].median())
 
     categorical_cols = [
@@ -47,14 +45,7 @@ def load_data():
 
 
 @st.cache_data
-def get_filtered_data(
-    industries=None,
-    regions=None,
-    exits=None
-):
-    """
-    Return filtered dataframe.
-    """
+def get_filtered_data(industries=None, regions=None, exits=None):
 
     df = load_data()
 
@@ -70,73 +61,37 @@ def get_filtered_data(
     return df
 
 
-@st.cache_data
 def get_kpis(df):
-    """
-    Generate dashboard KPI metrics.
-    """
 
-    kpis = {
+    profitability = 0
+
+    if "Profitable" in df.columns:
+        profitability = round(df["Profitable"].mean() * 100, 2)
+
+    return {
         "total_startups": len(df),
-
-        "total_funding":
-        round(
-            df["Funding Amount (M USD)"].sum(),
-            2
-        ),
-
-        "avg_valuation":
-        round(
-            df["Valuation (M USD)"].mean(),
-            2
-        ),
-
-        "total_revenue":
-        round(
-            df["Revenue (M USD)"].sum(),
-            2
-        ),
-
-        "total_employees":
-        int(
-            df["Employees"].sum()
-        ),
-
-        "profitability_rate":
-        round(
-            df["Profitable"].mean() * 100,
-            2
-        )
+        "total_funding": round(df["Funding Amount (M USD)"].sum(), 2),
+        "avg_valuation": round(df["Valuation (M USD)"].mean(), 2),
+        "total_revenue": round(df["Revenue (M USD)"].sum(), 2),
+        "total_employees": int(df["Employees"].sum()),
+        "profitability_rate": profitability
     }
 
-    return kpis
 
-
-@st.cache_data
-def get_top_startups(
-    df,
-    top_n=10
-):
-    """
-    Return top startups by valuation.
-    """
+def get_top_startups(df, top_n=10):
 
     return (
         df.sort_values(
-            by="Valuation (M USD)",
+            "Valuation (M USD)",
             ascending=False
         )
         .head(top_n)
     )
 
 
-@st.cache_data
 def get_industry_summary(df):
-    """
-    Industry-wise aggregation.
-    """
 
-    summary = (
+    return (
         df.groupby("Industry")
         .agg(
             Funding=("Funding Amount (M USD)", "sum"),
@@ -147,16 +102,10 @@ def get_industry_summary(df):
         .reset_index()
     )
 
-    return summary
 
-
-@st.cache_data
 def get_region_summary(df):
-    """
-    Region-wise aggregation.
-    """
 
-    summary = (
+    return (
         df.groupby("Region")
         .agg(
             Funding=("Funding Amount (M USD)", "sum"),
@@ -166,27 +115,17 @@ def get_region_summary(df):
         .reset_index()
     )
 
-    return summary
 
-
-@st.cache_data
 def get_correlation_matrix(df):
-    """
-    Numeric correlation matrix.
-    """
 
     numeric_df = df.select_dtypes(
-        include=["int64", "float64"]
+        include=["number"]
     )
 
     return numeric_df.corr()
 
 
-@st.cache_data
 def get_unicorns(df):
-    """
-    Startups valued at $1B+.
-    """
 
     return df[
         df["Valuation (M USD)"] >= 1000
